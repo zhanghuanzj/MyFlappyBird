@@ -16,7 +16,9 @@ public:
 	Bird();
 	Bird(BIRD_KINDS kind);
 	cocos2d::Sprite* getBird();
+	cocos2d::Animate* getBirdFly();
 	void bird_Fly();
+	void bird_Stop();
 private:
 	cocos2d::Sprite *bird;
 	

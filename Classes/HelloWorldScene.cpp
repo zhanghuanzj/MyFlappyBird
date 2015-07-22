@@ -1,11 +1,15 @@
 #include "HelloWorldScene.h"
 
+const int velocity_y = -900;
+
 USING_NS_CC;
 
 Scene* HelloWorld::createScene()
 {
     // 'scene' is an autorelease object
-    auto scene = Scene::create();
+    auto scene = Scene::createWithPhysics();
+	/*scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);*/
+	scene->getPhysicsWorld()->setGravity(Vec2(0,velocity_y));
     
     // 'layer' is an autorelease object
     auto layer = HelloWorld::create();
@@ -73,16 +77,57 @@ bool HelloWorld::init()
 	background->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
     this->addChild(background,0);
 
+	//create the world bound
+	auto worldBody = PhysicsBody::createEdgeBox(visibleSize,PHYSICSBODY_MATERIAL_DEFAULT,2.0f);
+	auto edgeNode = Node::create();
+	edgeNode->setPhysicsBody(worldBody);
+	edgeNode->setPosition(Vec2(visibleSize.width/2,visibleSize.height/2));
+	addChild(edgeNode);
+
 	//create a bird
-	Bird *myBird = new Bird();
+	myBird =  new Bird((BIRD_KINDS)random(0,2));
 	myBird->getBird()->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
+	myBird->getBird()->getPhysicsBody()->setGravityEnable(true);
 	this->addChild(myBird->getBird());
-	myBird->bird_Fly();
+	/*myBird->bird_Fly();*/
+
+	//set the scheduleUpdate
+	this->scheduleUpdate();
+
+	setTouchEnabled(true);
+	setTouchMode(Touch::DispatchMode::ONE_BY_ONE);
 
     return true;
 }
 
+void HelloWorld::update(float delta)
+{
+	log("update is coming");
+	auto velocity_bird = myBird->getBird()->getPhysicsBody()->getVelocity();
+	int angle = -velocity_bird.y*0.1-20;
+	if (angle>90)
+	{
+		angle = 90;
+	}
+	myBird->getBird()->setRotation(angle);
+}
+bool HelloWorld::onTouchBegan(Touch *touch, Event *unused_event)
+{
+	myBird->bird_Fly();
+	log("bird fly");
+	return true;     
+}
 
+void HelloWorld::onTouchMoved(Touch *touch, Event *unused_event)
+{
+	log("just move");
+}
+void HelloWorld::onTouchEnded(Touch *touch, Event *unused_event)
+{
+	/*myBird->bird_Stop();*/
+	log("bird stop");
+	log("the velocity is %f\n",myBird->getBird()->getPhysicsBody()->getVelocity().y);
+}
 void HelloWorld::menuCloseCallback(Ref* pSender)
 {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WP8) || (CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
