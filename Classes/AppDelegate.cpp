@@ -1,8 +1,8 @@
 #include "AppDelegate.h"
 #include "HelloWorldScene.h"
 
-#define WIDTH 576
-#define HEIGHT 960
+#define WIDTH 288
+#define HEIGHT 512
 USING_NS_CC;
 
 AppDelegate::AppDelegate() {
