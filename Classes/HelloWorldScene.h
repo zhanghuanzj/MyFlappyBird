@@ -3,6 +3,8 @@
 
 #include "cocos2d.h"
 #include "Bird.h"
+#include <vector>
+#include "GameStart.h"
 
 class HelloWorld : public cocos2d::Layer
 {
@@ -12,19 +14,33 @@ public:
 
     // Here's a difference. Method 'init' in cocos2d-x returns bool, instead of returning 'id' in cocos2d-iphone
     virtual bool init();
-    
-	void update(float delta);
+	virtual void onEnter();
+	virtual void onExit();
+    virtual void cleanup();
+
     // a selector callback
     void menuCloseCallback(cocos2d::Ref* pSender);
     
     // implement the "static create()" method manually
     CREATE_FUNC(HelloWorld);
 
-	Bird *myBird ;
+
 	virtual bool onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *unused_event);
 	virtual void onTouchMoved(cocos2d::Touch *touch, cocos2d::Event *unused_event);
 	virtual void onTouchEnded(cocos2d::Touch *touch, cocos2d::Event *unused_event);
 
+private:
+	void update(float delta);
+	void update_bird();
+	void update_pipes();
+	void update_bg();
+	void update_land();
+	int height_float();
+	void game_over();
+	void restart(cocos2d::Ref* pSender);
+
+	Bird *myBird;
+	std::vector<cocos2d::Node*> vec_pipes;
 };
 
 #endif // __HELLOWORLD_SCENE_H__
