@@ -4,7 +4,8 @@
 #include "cocos2d.h"
 #include "Bird.h"
 #include <vector>
-#include "GameStart.h"
+#include "GameOver.h"
+
 
 class HelloWorld : public cocos2d::Layer
 {
@@ -36,11 +37,13 @@ private:
 	void update_bg();
 	void update_land();
 	int height_float();
-	void game_over();
-	void restart(cocos2d::Ref* pSender);
+	bool Game_over();
+	bool isin_pipes();
+	void draw_score();
 
 	Bird *myBird;
 	std::vector<cocos2d::Node*> vec_pipes;
+	cocos2d::EventListenerPhysicsContact *listener;
 };
 
 #endif // __HELLOWORLD_SCENE_H__

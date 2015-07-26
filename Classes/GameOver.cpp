@@ -1,16 +1,16 @@
-#include "GameStart.h"
+#include "GameOver.h"
 
 
 USING_NS_CC;
 using namespace std;
 
-Scene* GameStart::createScene()
+Scene* GameOver::createScene()
 {
 	// 'scene' is an autorelease object
 	auto scene = Scene::create();
 
 	// 'layer' is an autorelease object
-	auto layer = GameStart::create();
+	auto layer = GameOver::create();
 
 	// add layer as a child to scene
 	scene->addChild(layer);
@@ -20,7 +20,7 @@ Scene* GameStart::createScene()
 }
 
 // on "init" you need to initialize your instance
-bool GameStart::init()
+bool GameOver::init()
 {
 	//////////////////////////////
 	// 1. super init first
@@ -36,7 +36,7 @@ bool GameStart::init()
 	auto closeItem = MenuItemImage::create(
 		"CloseNormal.png",
 		"CloseSelected.png",
-		CC_CALLBACK_1(GameStart::menuCloseCallback, this));
+		CC_CALLBACK_1(GameOver::menuCloseCallback, this));
 
 	closeItem->setPosition(Vec2(origin.x + visibleSize.width - closeItem->getContentSize().width/2 ,
 		origin.y + closeItem->getContentSize().height/2));
@@ -53,8 +53,8 @@ bool GameStart::init()
 
 
 	//initialize the SpriteFrameCache
-	SpriteFrameCache *frameCache = SpriteFrameCache::getInstance();
-	frameCache->addSpriteFramesWithFile("birdSprites.plist");
+	//SpriteFrameCache *frameCache = SpriteFrameCache::getInstance();
+	//frameCache->addSpriteFramesWithFile("birdSprites.plist");
 
 	auto ready = Sprite::createWithSpriteFrameName("text_ready.png");
 	ready->setPosition(visibleSize.width/2,visibleSize.height/2+100);
@@ -65,7 +65,7 @@ bool GameStart::init()
 	addChild(tutorial,1);
 
 	auto ok = Sprite::createWithSpriteFrameName("button_ok.png");
-	auto ok_item = MenuItemSprite::create(ok,ok,nullptr,CC_CALLBACK_1(GameStart::Game_Begin,this));
+	auto ok_item = MenuItemSprite::create(ok,ok,nullptr,CC_CALLBACK_1(GameOver::Game_Begin,this));
 	auto mu = Menu::create(ok_item,0);
 	mu->setPosition(visibleSize.width/2,visibleSize.height/2-80);
 	addChild(mu,2);
@@ -89,33 +89,33 @@ bool GameStart::init()
 	return true;
 }
 
-void GameStart::onEnter()
+void GameOver::onEnter()
 {
 	Layer::onEnter();
 	log("gamestart onEnter");
 }
 
-void GameStart::onExit()
+void GameOver::onExit()
 {
 	Layer::onExit();
 	log("gamestart onExit");
 }
 
-void GameStart::cleanup()
+void GameOver::cleanup()
 {
 	Layer::cleanup();
 	log("gamestart cleanup");
 
 }
-void GameStart::Game_Begin(Ref *pSender)
+void GameOver::Game_Begin(Ref *pSender)
 {
-	auto sc = HelloWorld::createScene();
-	Director::getInstance()->replaceScene(sc);
+	//auto sc = GameStart::createScene();
+	//Director::getInstance()->replaceScene(sc);
 }
 
 
 
-void GameStart::menuCloseCallback(Ref* pSender)
+void GameOver::menuCloseCallback(Ref* pSender)
 {
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WP8) || (CC_TARGET_PLATFORM == CC_PLATFORM_WINRT)
 	MessageBox("You pressed the close button. Windows Store Apps do not implement a close button.","Alert");
