@@ -19,12 +19,14 @@ const int pipe_height = 320;
 const int pipe_distance = 100;
 const int pipe_count = 2;
 
-int score = 0;
+int SCORE = 0;
 bool GAME_OVER = false;
 bool TRANS_COUNT = false;
+
 bool IS_ING = false;
 bool FLAG = false;
 USING_NS_CC;
+using namespace CocosDenshion;
 using namespace std;
 
 Scene* HelloWorld::createScene()
@@ -48,18 +50,19 @@ bool HelloWorld::init()
 {
     //////////////////////////////
     // 1. super init first
-	log("HelloWorld init..........");
-	log("GAME_OVER is %d",GAME_OVER);
+	if ( !Layer::init() )
+	{
+		return false;
+	}
+
+	//variable init
 	GAME_OVER = false;
 	TRANS_COUNT = false;
-	score = 0;
+	SCORE = 0;
 	IS_ING = false;
 	FLAG = false;
 	
-    if ( !Layer::init() )
-    {
-        return false;
-    }
+	UserDefault::getInstance()->setIntegerForKey("SCORE_CUR",0);
 
     Size visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
@@ -73,18 +76,13 @@ bool HelloWorld::init()
 	closeItem->setPosition(Vec2(origin.x + visibleSize.width - closeItem->getContentSize().width/2 ,
                                 origin.y + closeItem->getContentSize().height/2));
 
-    // create menu, it's an autorelease object
     auto menu = Menu::create(closeItem, NULL);
     menu->setPosition(Vec2::ZERO);
     this->addChild(menu, 1);
 
     // create and initialize a label
     auto label = Label::createWithTTF("Flappy Bird", "fonts/Marker Felt.ttf", 24);
-    
-    // position the label on the center of the screen
     label->setPosition(Vec2(origin.x + visibleSize.width/2,origin.y + visibleSize.height - label->getContentSize().height));
-
-    // add the label as a child to this layer
     this->addChild(label, 3);
 
 
@@ -106,10 +104,10 @@ bool HelloWorld::init()
 
 	//create a bird
 	myBird =  new Bird((BIRD_KINDS)random(0,2));
-	myBird->getBird()->setPosition(Vec2(visibleSize.width/2 + origin.x, visibleSize.height/2 + origin.y));
+	myBird->getBird()->setPosition(Vec2(visibleSize.width/2 + origin.x-45, visibleSize.height/2 + origin.y));
 	myBird->getBird()->getPhysicsBody()->setGravityEnable(true);
 	this->addChild(myBird->getBird(),2,BIRD);
-	
+	myBird->bird_Fly();
 
 
 	//create the land
@@ -154,13 +152,14 @@ bool HelloWorld::init()
 		vec_pipes.push_back(pipe_pair);
 	}
 	
+	//show the score
 	auto number_node = Node::create();
 	auto num_sprite = Sprite::createWithSpriteFrameName("font_048.png");
 	num_sprite->setPosition(visibleSize.width/2,visibleSize.height*4/5);
 	number_node->addChild(num_sprite);
 	addChild(number_node,4,NUMBER_NODE);
 
-
+	
 	//set the scheduleUpdate
 	this->scheduleUpdate();
 
@@ -173,27 +172,10 @@ bool HelloWorld::init()
 
 bool HelloWorld::Game_over()
 {
-	//log("GameOver.................................%d",GAME_OVER);
-	//if (!GAME_OVER)
-	//{
-	//	log("access-------------------------");
-	//	for (int i=0;i<pipe_count;i++)
-	//	{
-	//		vec_pipes[0]->getChildByTag(PIPE_UP)->getPhysicsBody()->setEnable(false);
-	//		vec_pipes[0]->getChildByTag(PIPE_DOWN)->getPhysicsBody()->setEnable(false);
-	//	}
-	//	GAME_OVER = true;
-	//	return true;
-	//}
-	//auto velocity_bird = myBird->getBird()->getPhysicsBody()->getVelocity();
-	//log("the velocity is %d,  %d",velocity_bird.x,velocity_bird.y);
-	//if (velocity_bird.x==0&&velocity_bird.y==0)    //When the velocity of bird is zero 
-	//{
 	log("begin to trans");
 	auto sc = GameOver::createScene();
-	auto resc = TransitionFade::create(3,sc);
+	auto resc = TransitionFade::create(2,sc);
 	Director::getInstance()->replaceScene(resc);
-	//}
 	return true;
 }
 
@@ -205,7 +187,6 @@ void HelloWorld::onEnter()
 	listener = EventListenerPhysicsContact::create();
 	/*listener->onContactBegin = CC_CALLBACK_0(HelloWorld::Game_over,this);*/
 	listener->onContactBegin=[this](PhysicsContact & contact)->bool{
-		this->getChildByTag(BIRD);
 		auto SpriteA = (Sprite*)contact.getShapeA()->getBody()->getNode();
 		auto SpriteB = (Sprite*)contact.getShapeB()->getBody()->getNode();
 
@@ -213,19 +194,27 @@ void HelloWorld::onEnter()
 		{
 			if (!TRANS_COUNT)
 			{
+				SimpleAudioEngine::getInstance()->playEffect("sounds/sfx_hit.wav");
+				GAME_OVER = true;
 				Game_over();
 				TRANS_COUNT = true;
 			}
 		}
 		else if (!GAME_OVER)
 		{
+			log("game is over++++++++++++++");
+			SimpleAudioEngine::getInstance()->playEffect("sounds/sfx_hit.wav");
+			unscheduleUpdate();
+			setTouchEnabled(false);
 			GAME_OVER = true;
 			for (int i=0;i<pipe_count;i++)
 			{
 				vec_pipes[i]->getChildByTag(PIPE_UP)->getPhysicsBody()->setEnable(false);
 				vec_pipes[i]->getChildByTag(PIPE_DOWN)->getPhysicsBody()->setEnable(false);
 			}
+			SimpleAudioEngine::getInstance()->playEffect("sounds/sfx_die.wav");
 		}
+
 		return true;
 	};
 
@@ -254,9 +243,9 @@ void HelloWorld::onExit()
 void HelloWorld::cleanup()
 {
 	Layer::cleanup();
-	/*CCNotificationCenter::sharedNotificationCenter()->removeAllObservers(this);*/
 	log("HelloWorld cleanup");
 }
+
 //update the bird
 void HelloWorld::update_bird()
 {
@@ -343,6 +332,7 @@ bool HelloWorld::isin_pipes()
 		if (abs(pipe_x-bird_x)<=26)
 		{
 			return true;
+			log("TRUE------------------");
 		}
 	}
 	return false;
@@ -350,13 +340,15 @@ bool HelloWorld::isin_pipes()
 
 void HelloWorld::draw_score()
 {
+	UserDefault::getInstance()->setIntegerForKey("SCORE_CUR",SCORE);
+	log("The current score is %d",UserDefault::getInstance()->getIntegerForKey("SCORE_CUR"));
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	auto number_node = this->getChildByTag(NUMBER_NODE);
 	if (number_node!=nullptr)
 	{
 		number_node->removeAllChildren();  //release the pre number sprites
 	}
-	int score_now = score;
+	int score_now = SCORE;
 	int positionX = 0;
 	int mod_num = 0;
 	int index = 0;
@@ -376,7 +368,7 @@ void HelloWorld::draw_score()
 }
 void HelloWorld::update(float delta)
 {
-	log("update is coming");
+	//log("update is coming");
 	if (GAME_OVER)
 	{
 		return;
@@ -392,9 +384,10 @@ void HelloWorld::update(float delta)
 		else if (!IS_ING&&FLAG)      //out the pipes add 1
 		{
 			FLAG = false;
-			score++;
-			log("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO");
+			SCORE++;
 			draw_score();
+			SimpleAudioEngine::getInstance()->playEffect("sounds/sfx_point.wav");
+			log("point+++++++++++++++++++");
 		}
 		update_bird();
 		update_bg();
