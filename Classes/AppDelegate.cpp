@@ -1,5 +1,5 @@
 #include "AppDelegate.h"
-#include "HelloWorldScene.h"
+#include "GameRun.h"
 #include "GameStart.h"
 
 #define WIDTH 288

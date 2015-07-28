@@ -3,7 +3,7 @@
 
 #include "cocos2d.h"
 #include "Bird.h"
-#include "HelloWorldScene.h"
+#include "GameRun.h"
 
 class GameStart : public cocos2d::Layer
 {
